@@ -2,22 +2,43 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 func recordHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		json.NewEncoder(w).Encode(getRecord())
+		get(w, r)
 	case http.MethodPost:
-		// Create a new record.
+		post(w, r)
 	case http.MethodPut:
-		// Update an existing record.
+		put(w, r)
 	case http.MethodDelete:
-		// Remove the record.
+		delete(w, r)
 	default:
-		w.WriteHeader(500)
+		bad(w, r)
 	}
+}
+
+func get(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(getRecord())
+}
+
+func post(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Not yet implemented")
+}
+
+func put(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Not yet implemented")
+}
+
+func delete(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Not yet implemented")
+}
+
+func bad(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 }
 
 func getRecord() Record {
