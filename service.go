@@ -9,3 +9,7 @@ var records = map[int]Record{
 func getRecords() map[int]Record {
 	return records
 }
+
+func getRecord(id int) Record {
+	return records[id]
+}
