@@ -28,7 +28,10 @@ func get(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == `/record/` {
 		json.NewEncoder(w).Encode(getRecords())
 	} else if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
-		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, `/record/`))
+		id, err := strconv.ParseInt(
+			strings.TrimPrefix(r.URL.Path, `/record/`),
+			10,
+			64)
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
@@ -39,7 +42,17 @@ func get(w http.ResponseWriter, r *http.Request) {
 }
 
 func post(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Not yet implemented")
+	var record Record
+	if r.Body == nil {
+		http.Error(w, "Please send a request body", 400)
+		return
+	}
+	err := json.NewDecoder(r.Body).Decode(&record)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	createRecord(record)
 }
 
 func put(w http.ResponseWriter, r *http.Request) {
