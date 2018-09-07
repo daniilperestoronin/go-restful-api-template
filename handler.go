@@ -11,37 +11,20 @@ import (
 
 func recordHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case http.MethodGet:
-		get(w, r)
 	case http.MethodPost:
-		post(w, r)
+		create(w, r)
+	case http.MethodGet:
+		read(w, r)
 	case http.MethodPut:
-		put(w, r)
+		update(w, r)
 	case http.MethodDelete:
-		delete(w, r)
+		remove(w, r)
 	default:
 		bad(w, r)
 	}
 }
 
-func get(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == `/record/` {
-		json.NewEncoder(w).Encode(getRecords())
-	} else if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
-		id, err := strconv.ParseInt(
-			strings.TrimPrefix(r.URL.Path, `/record/`),
-			10,
-			64)
-		if err != nil {
-			fmt.Fprintf(w, "Invalid id")
-		}
-		json.NewEncoder(w).Encode(getRecord(id))
-	} else {
-		bad(w, r)
-	}
-}
-
-func post(w http.ResponseWriter, r *http.Request) {
+func create(w http.ResponseWriter, r *http.Request) {
 	var record Record
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
@@ -55,11 +38,28 @@ func post(w http.ResponseWriter, r *http.Request) {
 	createRecord(record)
 }
 
-func put(w http.ResponseWriter, r *http.Request) {
+func read(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == `/record/` {
+		json.NewEncoder(w).Encode(readRecords())
+	} else if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
+		id, err := strconv.ParseInt(
+			strings.TrimPrefix(r.URL.Path, `/record/`),
+			10,
+			64)
+		if err != nil {
+			fmt.Fprintf(w, "Invalid id")
+		}
+		json.NewEncoder(w).Encode(readRecord(id))
+	} else {
+		bad(w, r)
+	}
+}
+
+func update(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Not yet implemented")
 }
 
-func delete(w http.ResponseWriter, r *http.Request) {
+func remove(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Not yet implemented")
 }
 
