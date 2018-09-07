@@ -60,7 +60,18 @@ func update(w http.ResponseWriter, r *http.Request) {
 }
 
 func remove(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Not yet implemented")
+	if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
+		id, err := strconv.ParseInt(
+			strings.TrimPrefix(r.URL.Path, `/record/`),
+			10,
+			64)
+		if err != nil {
+			fmt.Fprintf(w, "Invalid id")
+		}
+		removeRecord(id)
+	} else {
+		bad(w, r)
+	}
 }
 
 func bad(w http.ResponseWriter, r *http.Request) {

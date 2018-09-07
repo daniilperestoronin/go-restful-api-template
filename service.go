@@ -17,3 +17,7 @@ func readRecords() map[int64]Record {
 func readRecord(id int64) Record {
 	return records[id]
 }
+
+func removeRecord(id int64) {
+	delete(records, id)
+}
