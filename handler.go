@@ -56,7 +56,17 @@ func read(w http.ResponseWriter, r *http.Request) {
 }
 
 func update(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Not yet implemented")
+	var record Record
+	if r.Body == nil {
+		http.Error(w, "Please send a request body", 400)
+		return
+	}
+	err := json.NewDecoder(r.Body).Decode(&record)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	updateRecord(record)
 }
 
 func remove(w http.ResponseWriter, r *http.Request) {

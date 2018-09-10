@@ -18,6 +18,10 @@ func readRecord(id int64) Record {
 	return records[id]
 }
 
+func updateRecord(record Record) {
+	records[record.Id] = record
+}
+
 func removeRecord(id int64) {
 	delete(records, id)
 }
