@@ -12,19 +12,19 @@ import (
 func recordHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		create(w, r)
+		httpPost(w, r)
 	case http.MethodGet:
-		read(w, r)
+		httpGet(w, r)
 	case http.MethodPut:
-		update(w, r)
+		httpPut(w, r)
 	case http.MethodDelete:
-		remove(w, r)
+		httpDelete(w, r)
 	default:
 		bad(w, r)
 	}
 }
 
-func create(w http.ResponseWriter, r *http.Request) {
+func httpPost(w http.ResponseWriter, r *http.Request) {
 	var record Record
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
@@ -35,12 +35,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	createRecord(record)
+	create(record)
 }
 
-func read(w http.ResponseWriter, r *http.Request) {
+func httpGet(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == `/record/` {
-		json.NewEncoder(w).Encode(readRecords())
+		json.NewEncoder(w).Encode(readAll())
 	} else if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
 		id, err := strconv.ParseInt(
 			strings.TrimPrefix(r.URL.Path, `/record/`),
@@ -49,13 +49,13 @@ func read(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
-		json.NewEncoder(w).Encode(readRecord(id))
+		json.NewEncoder(w).Encode(read(id))
 	} else {
 		bad(w, r)
 	}
 }
 
-func update(w http.ResponseWriter, r *http.Request) {
+func httpPut(w http.ResponseWriter, r *http.Request) {
 	var record Record
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
@@ -66,10 +66,10 @@ func update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	updateRecord(record)
+	update(record)
 }
 
-func remove(w http.ResponseWriter, r *http.Request) {
+func httpDelete(w http.ResponseWriter, r *http.Request) {
 	if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
 		id, err := strconv.ParseInt(
 			strings.TrimPrefix(r.URL.Path, `/record/`),
@@ -78,7 +78,7 @@ func remove(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
-		removeRecord(id)
+		remove(id)
 	} else {
 		bad(w, r)
 	}

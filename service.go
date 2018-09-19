@@ -6,22 +6,22 @@ var records = map[int64]Record{
 	3: {Id: 3, Title: "Title 3", Text: "Blah Blah Blah Blah 3"},
 }
 
-func createRecord(record Record) {
+func create(record Record) {
 	records[record.Id] = record
 }
 
-func readRecords() map[int64]Record {
+func readAll() map[int64]Record {
 	return records
 }
 
-func readRecord(id int64) Record {
+func read(id int64) Record {
 	return records[id]
 }
 
-func updateRecord(record Record) {
+func update(record Record) {
 	records[record.Id] = record
 }
 
-func removeRecord(id int64) {
+func remove(id int64) {
 	delete(records, id)
 }
