@@ -9,8 +9,8 @@ const connStr = "user=postgres password=postgres dbname=records sslmode=disable"
 
 type RecordRepository struct{}
 
-func NewRecordRepository() *RecordRepository {
-	return &RecordRepository{}
+func NewRecordRepository() RecordRepository {
+	return RecordRepository{}
 }
 
 func (r *RecordRepository) Create(record Record) (int64, error) {
@@ -21,7 +21,7 @@ func (r *RecordRepository) Create(record Record) (int64, error) {
 	defer db.Close()
 
 	var id, errIn = db.Exec(
-		"insert into record (title, text) values ( $1, $2)",
+		`INSERT INTO record (title, text) VALUES ( $1, $2)`,
 		record.Title, record.Text)
 	if errIn != nil {
 		return 0, err
@@ -31,10 +31,11 @@ func (r *RecordRepository) Create(record Record) (int64, error) {
 
 func (r *RecordRepository) ReadAll() ([]Record, error) {
 	db, err := sql.Open("postgres", connStr)
-	rows, err := db.Query("SELECT * FROM record")
+	rows, err := db.Query(`SELECT * FROM record`)
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 	defer rows.Close()
 
 	records := make([]Record, 0)
@@ -55,21 +56,41 @@ func (r *RecordRepository) ReadAll() ([]Record, error) {
 func (r *RecordRepository) Read(id int64) (Record, error) {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		return nil, err
+		return Record{}, err
 	}
-	row := db.QueryRow("SELECT * FROM books WHERE isbn = $1", id)
+	defer db.Close()
+	row := db.QueryRow(`SELECT * FROM record WHERE id = $1`, id)
 	record := Record{}
 	errSc := row.Scan(&record.Id, &record.Title, &record.Text)
 	if errSc != nil {
-		return nil, errSc
+		return Record{}, errSc
 	}
 	return record, nil
 }
 
-func (r *RecordRepository) Update(record Record) {
-	records[record.Id] = record
+func (r *RecordRepository) Update(record Record) error {
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(
+		`UPDATE record
+		SET title = $2, text = $3
+		WHERE id = $1;`,
+		record.Id,
+		record.Title,
+		record.Text)
+	return err
 }
 
-func (r *RecordRepository) Delete(id int64) {
-	delete(records, id)
+func (r *RecordRepository) Delete(id int64) error {
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(
+		`DELETE FROM record
+		WHERE id = $1;`,
+		id)
+	return err
 }
