@@ -40,7 +40,11 @@ func httpPost(w http.ResponseWriter, r *http.Request) {
 
 func httpGet(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == `/record/` {
-		json.NewEncoder(w).Encode(readAll())
+		records, err := readAll()
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+		json.NewEncoder(w).Encode(records)
 	} else if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
 		id, err := strconv.ParseInt(
 			strings.TrimPrefix(r.URL.Path, `/record/`),
@@ -49,7 +53,11 @@ func httpGet(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
-		json.NewEncoder(w).Encode(read(id))
+		record, err := read(id)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+		json.NewEncoder(w).Encode(record)
 	} else {
 		bad(w, r)
 	}
