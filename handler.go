@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+var (
+	recSer = NewRecordService(NewRecordRepository())
+)
+
 func recordHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -35,12 +39,12 @@ func httpPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	create(record)
+	recSer.Create(record)
 }
 
 func httpGet(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == `/record/` {
-		records, err := readAll()
+		records, err := recSer.ReadAll()
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 		}
@@ -53,7 +57,7 @@ func httpGet(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
-		record, err := read(id)
+		record, err := recSer.Read(id)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 		}
@@ -74,7 +78,7 @@ func httpPut(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	update(record)
+	recSer.Update(record)
 }
 
 func httpDelete(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +90,7 @@ func httpDelete(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
-		remove(id)
+		recSer.Remove(id)
 	} else {
 		bad(w, r)
 	}

@@ -1,23 +1,31 @@
 package main
 
-var recordRepository = NewRecordRepository()
-
-func create(record Record) (int64, error) {
-	return recordRepository.Create(record)
+type RecordService struct {
+	rRep RecordRepository
 }
 
-func readAll() ([]Record, error) {
-	return recordRepository.ReadAll()
+func NewRecordService(recRep RecordRepository) RecordService {
+	return RecordService{
+		rRep: recRep,
+	}
 }
 
-func read(id int64) (Record, error) {
-	return recordRepository.Read(id)
+func (rs RecordService) Create(record Record) (int64, error) {
+	return rs.rRep.Create(record)
 }
 
-func update(record Record) error {
-	return recordRepository.Update(record)
+func (rs RecordService) ReadAll() ([]Record, error) {
+	return rs.rRep.ReadAll()
 }
 
-func remove(id int64) error {
-	return recordRepository.Delete(id)
+func (rs RecordService) Read(id int64) (Record, error) {
+	return rs.rRep.Read(id)
+}
+
+func (rs RecordService) Update(record Record) error {
+	return rs.rRep.Update(record)
+}
+
+func (rs RecordService) Remove(id int64) error {
+	return rs.rRep.Delete(id)
 }
