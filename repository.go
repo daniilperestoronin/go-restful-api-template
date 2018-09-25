@@ -5,16 +5,24 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const connStr = "user=postgres password=postgres dbname=records sslmode=disable"
+type RecordRepository struct {
+	driverName     string
+	dataSourceName string
+}
 
-type RecordRepository struct{}
+func NewRecordRepository(driverStr string, dataSourceStr string) RecordRepository {
+	return RecordRepository{
+		driverName:     driverStr,
+		dataSourceName: dataSourceStr,
+	}
+}
 
-func NewRecordRepository() RecordRepository {
-	return RecordRepository{}
+func (r *RecordRepository) getDb() (*sql.DB, error) {
+	return sql.Open(r.driverName, r.dataSourceName)
 }
 
 func (r *RecordRepository) Create(record Record) (int64, error) {
-	db, err := sql.Open("postgres", connStr)
+	db, err := r.getDb()
 	if err != nil {
 		return 0, err
 	}
@@ -30,7 +38,7 @@ func (r *RecordRepository) Create(record Record) (int64, error) {
 }
 
 func (r *RecordRepository) ReadAll() ([]Record, error) {
-	db, err := sql.Open("postgres", connStr)
+	db, err := r.getDb()
 	rows, err := db.Query(`SELECT * FROM record`)
 	if err != nil {
 		return nil, err
@@ -54,7 +62,7 @@ func (r *RecordRepository) ReadAll() ([]Record, error) {
 }
 
 func (r *RecordRepository) Read(id int64) (Record, error) {
-	db, err := sql.Open("postgres", connStr)
+	db, err := r.getDb()
 	if err != nil {
 		return Record{}, err
 	}
@@ -69,7 +77,7 @@ func (r *RecordRepository) Read(id int64) (Record, error) {
 }
 
 func (r *RecordRepository) Update(record Record) error {
-	db, err := sql.Open("postgres", connStr)
+	db, err := r.getDb()
 	if err != nil {
 		return err
 	}
@@ -84,7 +92,7 @@ func (r *RecordRepository) Update(record Record) error {
 }
 
 func (r *RecordRepository) Delete(id int64) error {
-	db, err := sql.Open("postgres", connStr)
+	db, err := r.getDb()
 	if err != nil {
 		return err
 	}

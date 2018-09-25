@@ -9,8 +9,13 @@ import (
 	"strings"
 )
 
+const (
+	dbDriver     = "postgres"
+	dbDataSource = "user=postgres password=postgres dbname=records sslmode=disable"
+)
+
 var (
-	recSer = NewRecordService(NewRecordRepository())
+	recSer = NewRecordService(NewRecordRepository(dbDriver, dbDataSource))
 )
 
 func recordHandler(w http.ResponseWriter, r *http.Request) {
