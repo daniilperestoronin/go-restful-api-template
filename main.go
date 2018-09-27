@@ -12,7 +12,7 @@ const (
 
 func main() {
 
-	recRep := NewRecordRepository(dbDriver, dbDataSource)
+	recRep := NewPgRecordRepository(dbDriver, dbDataSource)
 	recSer := NewRecordService(recRep)
 	recHand := NewRecordHandler(recSer)
 
