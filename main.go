@@ -17,5 +17,6 @@ func main() {
 	recHand := NewRecordHandler(recSer)
 
 	http.HandleFunc("/record/", recHand.Handle)
+	log.Println("Record service start")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

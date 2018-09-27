@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -20,6 +21,9 @@ func NewRecordHandler(recSrv RecordService) RecordHandler {
 }
 
 func (rh RecordHandler) Handle(w http.ResponseWriter, r *http.Request) {
+	log.Println("Request from: " + r.RemoteAddr +
+		", method:" + r.Method +
+		", to: " + r.URL.Host)
 	switch r.Method {
 	case http.MethodPost:
 		rh.httpPost(w, r)
@@ -38,11 +42,13 @@ func (rh RecordHandler) httpPost(w http.ResponseWriter, r *http.Request) {
 	var record Record
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
+		log.Print("Missing request body, return 400")
 		return
 	}
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
+		log.Print("Wrong request body, return 400", err.Error())
 		return
 	}
 	rh.rSrv.Create(record)
@@ -53,6 +59,7 @@ func (rh RecordHandler) httpGet(w http.ResponseWriter, r *http.Request) {
 		records, err := rh.rSrv.ReadAll()
 		if err != nil {
 			http.Error(w, err.Error(), 500)
+			log.Print("Get Records error, return 500", err.Error())
 		}
 		json.NewEncoder(w).Encode(records)
 	} else if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
@@ -66,6 +73,7 @@ func (rh RecordHandler) httpGet(w http.ResponseWriter, r *http.Request) {
 		record, err := rh.rSrv.Read(id)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
+			log.Print("Get Record error, return 500", err.Error())
 		}
 		json.NewEncoder(w).Encode(record)
 	} else {
@@ -77,11 +85,13 @@ func (rh RecordHandler) httpPut(w http.ResponseWriter, r *http.Request) {
 	var record Record
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
+		log.Print("Wrong request body, return 400")
 		return
 	}
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
+		log.Print("Update Error, return 400")
 		return
 	}
 	rh.rSrv.Update(record)
