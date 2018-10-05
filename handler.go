@@ -48,7 +48,7 @@ func (rh RecordHandler) httpPost(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
-		log.Print("Wrong request body, return 400", err.Error())
+		log.Print("Wrong request body, return 400: ", err.Error())
 		return
 	}
 	rh.rSrv.Create(record)
@@ -59,7 +59,7 @@ func (rh RecordHandler) httpGet(w http.ResponseWriter, r *http.Request) {
 		records, err := rh.rSrv.ReadAll()
 		if err != nil {
 			http.Error(w, err.Error(), 500)
-			log.Print("Get Records error, return 500", err.Error())
+			log.Print("Get Records error, return 500: ", err.Error())
 		}
 		json.NewEncoder(w).Encode(records)
 	} else if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
@@ -73,7 +73,7 @@ func (rh RecordHandler) httpGet(w http.ResponseWriter, r *http.Request) {
 		record, err := rh.rSrv.Read(id)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
-			log.Print("Get Record error, return 500", err.Error())
+			log.Print("Get Record error, return 500: ", err.Error())
 		}
 		json.NewEncoder(w).Encode(record)
 	} else {

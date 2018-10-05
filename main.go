@@ -1,21 +1,21 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
-
-	var dbDriver, dbDataSource string
-	flag.StringVar(&dbDriver, "db_driver", "bar", "a string var")
-	flag.StringVar(&dbDataSource, "db_data_source", "bar", "a string var")
-	flag.Parse()
-
+	var (
+		dbDriver     = os.Getenv("DB_DRIVER")
+		dbDataSource = os.Getenv("DB_DATA_SOURCE")
+	)
 	if dbDriver == "" || dbDataSource == "" {
-		panic("db_driver or b_data_source don't specified")
+		panic("DB_DRIVER and DB_DATA_SOURCE not specified")
 	}
+	log.Print("DB_DRIVER: " + dbDriver)
+	log.Print("DB_DATA_SOURCE: " + dbDataSource)
 
 	recRep := NewPgRecordRepository(dbDriver, dbDataSource)
 	recSer := NewRecordService(recRep)
