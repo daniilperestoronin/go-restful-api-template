@@ -1,35 +1,35 @@
-package main
+package record
 
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
 )
 
-type RecordRepository interface {
-	Create(record Record) (int64, error)
-	ReadAll() ([]Record, error)
-	Read(id int64) (Record, error)
-	Update(record Record) error
-	Delete(id int64) error
+type Repository interface {
+	create(record Record) (int64, error)
+	readAll() ([]Record, error)
+	read(id int64) (Record, error)
+	update(record Record) error
+	delete(id int64) error
 }
 
-type PgRecordRepository struct {
+type PgRepository struct {
 	driverName     string
 	dataSourceName string
 }
 
-func NewPgRecordRepository(driverStr string, dataSourceStr string) PgRecordRepository {
-	return PgRecordRepository{
+func NewPgRepository(driverStr string, dataSourceStr string) PgRepository {
+	return PgRepository{
 		driverName:     driverStr,
 		dataSourceName: dataSourceStr,
 	}
 }
 
-func (r PgRecordRepository) getDb() (*sql.DB, error) {
+func (r PgRepository) getDb() (*sql.DB, error) {
 	return sql.Open(r.driverName, r.dataSourceName)
 }
 
-func (r PgRecordRepository) Create(record Record) (int64, error) {
+func (r PgRepository) create(record Record) (int64, error) {
 	db, err := r.getDb()
 	if err != nil {
 		return 0, err
@@ -45,7 +45,7 @@ func (r PgRecordRepository) Create(record Record) (int64, error) {
 	return id.RowsAffected()
 }
 
-func (r PgRecordRepository) ReadAll() ([]Record, error) {
+func (r PgRepository) readAll() ([]Record, error) {
 	db, err := r.getDb()
 	rows, err := db.Query(`SELECT * FROM record`)
 	if err != nil {
@@ -69,7 +69,7 @@ func (r PgRecordRepository) ReadAll() ([]Record, error) {
 	return records, nil
 }
 
-func (r PgRecordRepository) Read(id int64) (Record, error) {
+func (r PgRepository) read(id int64) (Record, error) {
 	db, err := r.getDb()
 	if err != nil {
 		return Record{}, err
@@ -84,7 +84,7 @@ func (r PgRecordRepository) Read(id int64) (Record, error) {
 	return record, nil
 }
 
-func (r PgRecordRepository) Update(record Record) error {
+func (r PgRepository) update(record Record) error {
 	db, err := r.getDb()
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (r PgRecordRepository) Update(record Record) error {
 	return err
 }
 
-func (r PgRecordRepository) Delete(id int64) error {
+func (r PgRepository) delete(id int64) error {
 	db, err := r.getDb()
 	if err != nil {
 		return err

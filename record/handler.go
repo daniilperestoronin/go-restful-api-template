@@ -1,4 +1,4 @@
-package main
+package record
 
 import (
 	"encoding/json"
@@ -10,35 +10,35 @@ import (
 	"strings"
 )
 
-type RecordHandler struct {
-	rSrv RecordService
+type Handler struct {
+	srv Service
 }
 
-func NewRecordHandler(recSrv RecordService) RecordHandler {
-	return RecordHandler{
-		rSrv: recSrv,
+func NewHandler(s Service) Handler {
+	return Handler{
+		srv: s,
 	}
 }
 
-func (rh RecordHandler) Handle(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request from: " + r.RemoteAddr +
 		", method:" + r.Method +
 		", to: " + r.URL.Host)
 	switch r.Method {
 	case http.MethodPost:
-		rh.httpPost(w, r)
+		h.httpPost(w, r)
 	case http.MethodGet:
-		rh.httpGet(w, r)
+		h.httpGet(w, r)
 	case http.MethodPut:
-		rh.httpPut(w, r)
+		h.httpPut(w, r)
 	case http.MethodDelete:
-		rh.httpDelete(w, r)
+		h.httpDelete(w, r)
 	default:
-		rh.bad(w, r)
+		h.bad(w, r)
 	}
 }
 
-func (rh RecordHandler) httpPost(w http.ResponseWriter, r *http.Request) {
+func (h Handler) httpPost(w http.ResponseWriter, r *http.Request) {
 	var record Record
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
@@ -51,12 +51,12 @@ func (rh RecordHandler) httpPost(w http.ResponseWriter, r *http.Request) {
 		log.Print("Wrong request body, return 400: ", err.Error())
 		return
 	}
-	rh.rSrv.Create(record)
+	h.srv.create(record)
 }
 
-func (rh RecordHandler) httpGet(w http.ResponseWriter, r *http.Request) {
+func (h Handler) httpGet(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == `/record/` {
-		records, err := rh.rSrv.ReadAll()
+		records, err := h.srv.readAll()
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			log.Print("Get Records error, return 500: ", err.Error())
@@ -70,18 +70,18 @@ func (rh RecordHandler) httpGet(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
-		record, err := rh.rSrv.Read(id)
+		record, err := h.srv.read(id)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			log.Print("Get Record error, return 500: ", err.Error())
 		}
 		json.NewEncoder(w).Encode(record)
 	} else {
-		rh.bad(w, r)
+		h.bad(w, r)
 	}
 }
 
-func (rh RecordHandler) httpPut(w http.ResponseWriter, r *http.Request) {
+func (h Handler) httpPut(w http.ResponseWriter, r *http.Request) {
 	var record Record
 	if r.Body == nil {
 		http.Error(w, "Please send a request body", 400)
@@ -91,13 +91,13 @@ func (rh RecordHandler) httpPut(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
-		log.Print("Update Error, return 400")
+		log.Print("update Error, return 400")
 		return
 	}
-	rh.rSrv.Update(record)
+	h.srv.update(record)
 }
 
-func (rh RecordHandler) httpDelete(w http.ResponseWriter, r *http.Request) {
+func (h Handler) httpDelete(w http.ResponseWriter, r *http.Request) {
 	if regexp.MustCompile(`/record/+[0-9]+$`).MatchString(r.URL.Path) {
 		id, err := strconv.ParseInt(
 			strings.TrimPrefix(r.URL.Path, `/record/`),
@@ -106,12 +106,12 @@ func (rh RecordHandler) httpDelete(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprintf(w, "Invalid id")
 		}
-		rh.rSrv.Remove(id)
+		h.srv.remove(id)
 	} else {
-		rh.bad(w, r)
+		h.bad(w, r)
 	}
 }
 
-func (rh RecordHandler) bad(w http.ResponseWriter, r *http.Request) {
+func (h Handler) bad(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }

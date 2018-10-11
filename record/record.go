@@ -1,4 +1,4 @@
-package main
+package record
 
 type Record struct {
 	Id    int64  `json:"id,omitempty"`

@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/daniilperestoronin/go-restful-api-template/record"
 )
 
 func main() {
@@ -17,9 +19,9 @@ func main() {
 	log.Print("DB_DRIVER: " + dbDriver)
 	log.Print("DB_DATA_SOURCE: " + dbDataSource)
 
-	recRep := NewPgRecordRepository(dbDriver, dbDataSource)
-	recSer := NewRecordService(recRep)
-	recHand := NewRecordHandler(recSer)
+	recRep := record.NewPgRepository(dbDriver, dbDataSource)
+	recSer := record.NewService(recRep)
+	recHand := record.NewHandler(recSer)
 
 	http.HandleFunc("/record/", recHand.Handle)
 	log.Println("Record service start")
