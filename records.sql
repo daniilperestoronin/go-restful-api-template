@@ -9,4 +9,3 @@ CREATE TABLE record (
 );
 
 GRANT ALL PRIVILEGES ON record TO record_user;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO record_user;
