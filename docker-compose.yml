@@ -1,0 +1,21 @@
+version: '3.6'
+
+services:
+  record-service:
+    build:
+      dockerfile: Dockerfile
+    container_name: record-service
+    image: record-service
+    entrypoint:
+    - DB_DRIVER
+    - DB_DATA_SOURCE
+    ports:
+    - '8080:8080'
+
+  record-postgres-db:
+    ports:
+    - '5432:5432'
+    restart: always
+    image: postgres:10.5-alpine
+    volumes:
+    - ./postgres-init.sh:/docker-entrypoint-initdb.d/init.sh
